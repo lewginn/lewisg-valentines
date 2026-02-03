@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    :root {
+      --bg1: #ffedf3;
+      --bg2: #ffe6fb;
+      --text: #2b2b2b;
+      --yes: #22c55e;
+      --no: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      color: var(--text);
+      overflow: hidden;
+    }
+    .card {
+      width: min(520px, 92vw);
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      position: relative;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p  { margin: 0 0 18px; opacity: 0.9; }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 10px;
+      position: relative;
+      height: 90px;
+    }
+    button {
+      border: 0;
+      padding: 14px 18px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      user-select: none;
+      touch-action: manipulation;
+    }
+    #yesBtn { background: var(--yes); color: white; }
+    #noBtn  { background: var(--no); color: white; position: absolute; left: 56%; top: 14px; transform: translateX(-50%); }
+    #yesBtn:hover { transform: translateY(-1px); }
+    .heart {
+      position: fixed;
+      top: -20px;
+      font-size: 18px;
+      opacity: 0.85;
+      animation: fall linear forwards;
+      pointer-events: none;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.08));
+    }
+    @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0.3; } }
+    .hidden { display: none; }
+    .success {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.25);
+      font-weight: 650;
+    }
+    .tiny { opacity: 0.75; font-size: 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="title">Will you be my Valentine?</h2>
+    <div class="buttons" id="arena">
+      <button id="yesBtn">Yes 💘</button>
+      <button id="noBtn">No 😶</button>
+    </div>
+
+    <div id="success" class="success hidden">
+      Unreal, you chose: Anal. Knickers off please x 😌 💞
+    </div>
+
+    <div class="tiny" id="counter"></div>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const title = document.getElementById("title");
+    const success = document.getElementById("success");
+    const counter = document.getElementById("counter");
+
+    const messages = [
+      "Will you be my Valentine?",
+      "Bumbaclart, try again?",
+      "BUMBACLART.",
+      "Red Flag, click 'Yes' instead.",
+      "Do not redeem.",
+      "I'm downloading hinge with distance set to max.",
+      "no = breath stinks.",
+      "no = can't hit protein goal.",
+      "no = awful at head.",
+      "no = your dad does the silva bumpa.",
+      "Fine, click 'No' and we have to do Anal."
+    ];
+
+    let dodges = 0;
+
+    function setNoPositionRandomly() {
+      const arena = document.getElementById("arena");
+      const rect = arena.getBoundingClientRect();
+
+      const btnRect = noBtn.getBoundingClientRect();
+      const maxX = rect.width - btnRect.width;
+      const maxY = rect.height - btnRect.height;
+
+      const yesRect = yesBtn.getBoundingClientRect();
+      const padding = 10;
+
+      let x = 0;
+      let y = 0;
+      let attempts = 0;
+
+      // Try a few random spots that don't overlap the Yes button
+      do {
+        x = Math.max(0, Math.min(maxX, Math.random() * maxX));
+        y = Math.max(0, Math.min(maxY, Math.random() * maxY));
+        attempts++;
+
+        const noLeft = rect.left + x;
+        const noTop = rect.top + y;
+        const noRight = noLeft + btnRect.width;
+        const noBottom = noTop + btnRect.height;
+
+        const yesLeft = yesRect.left - padding;
+        const yesTop = yesRect.top - padding;
+        const yesRight = yesRect.right + padding;
+        const yesBottom = yesRect.bottom + padding;
+
+        const overlaps =
+          noRight > yesLeft &&
+          noLeft < yesRight &&
+          noBottom > yesTop &&
+          noTop < yesBottom;
+
+        if (!overlaps) break;
+      } while (attempts < 20);
+
+      noBtn.style.left = `${x + btnRect.width/2}px`;
+      noBtn.style.top  = `${y}px`;
+    }
+
+    function sprinkleHearts(count = 18) {
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement("div");
+        el.className = "heart";
+        el.textContent = Math.random() > 0.5 ? "💖" : "💘";
+        el.style.left = `${Math.random() * 100}vw`;
+        el.style.animationDuration = `${2 + Math.random() * 2.5}s`;
+        el.style.fontSize = `${14 + Math.random() * 18}px`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 6000);
+      }
+    }
+
+    const maxDodges = Math.max(0, messages.length - 1);
+
+    function updateUI() {
+      const clamped = Math.min(dodges, maxDodges);
+      title.textContent = messages[clamped];
+      yesBtn.classList.toggle("hidden", clamped >= maxDodges);
+      if (clamped >= maxDodges) {
+        noBtn.style.left = "50%";
+        noBtn.style.top = "14px";
+        noBtn.style.transform = "translateX(-50%) scale(1.6)";
+      } else {
+        const noScale = Math.max(0.6, 1 - clamped * 0.05);
+        noBtn.style.transform = `translateX(-50%) scale(${noScale})`;
+      }
+    }
+
+    const accept = () => {
+      success.classList.remove("hidden");
+      sprinkleHearts(30);
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+      yesBtn.style.opacity = 0.9;
+      noBtn.style.opacity = 0.7;
+    };
+
+    // Make No dodge the cursor (and taps)
+    const dodge = () => {
+      dodges++;
+      updateUI();
+
+      // On the last message, "No" acts like "Yes"
+      if (dodges >= maxDodges) {
+        noBtn.textContent = "No";
+        noBtn.style.background = "#f59e0b";
+        yesBtn.classList.add("hidden");
+        noBtn.onclick = accept;
+        return;
+      }
+
+      setNoPositionRandomly();
+    };
+
+    noBtn.addEventListener("click", dodge);
+
+    yesBtn.addEventListener("click", accept);
+
+    // Initial positioning
+    updateUI();
+    setNoPositionRandomly();
+  </script>
+</body>
+</html>
